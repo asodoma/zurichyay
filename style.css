@@ -1,0 +1,903 @@
+:root {
+  --ink: #111;
+  --bg:  #fff;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* ─── Logo ───────────────────────────────────────── */
+
+header {
+  padding-top: 56px;
+  text-align: center;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-mark {
+  display: flex;
+  gap: 5px;
+}
+
+.logo-panel {
+  background: #D7141A;
+  padding: 8px 11px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-panel span {
+  display: block;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.18;
+  letter-spacing: 0.5px;
+}
+
+.logo-yay {
+  font-family: 'Crimson Text', Georgia, serif;
+  font-style: italic;
+  font-size: 76px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* ─── Logo link ──────────────────────────────────── */
+
+.logo-link {
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ─── Homepage ───────────────────────────────────── */
+
+.home-content {
+  padding: 12px 0 80px;
+  max-width: 600px;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-greeting {
+  font-family: 'Crimson Text', Georgia, serif;
+  font-style: italic;
+  font-size: 56px;
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: 36px;
+  font-weight: 400;
+}
+
+.home-body {
+  flex: 1;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--ink);
+}
+
+.home-body p {
+  margin-bottom: 22px;
+}
+
+.home-body a {
+  color: var(--ink);
+  text-underline-offset: 3px;
+}
+
+.home-credit {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10.5px;
+  color: #bbb;
+  margin-top: 64px;
+  letter-spacing: 0.03em;
+}
+
+/* ─── Navigation ─────────────────────────────────── */
+
+nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+  border-top: 1px solid #e8e8e8;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.nav-link {
+  display: inline-block;
+  padding: 16px 14px;
+  font-size: 0.68rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #aaa;
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+.nav-link:hover              { color: var(--ink); }
+.nav-link.active             { color: var(--ink); }
+.nav-link.active::after,
+.nav-link:hover::after       { transform: scaleX(1); }
+
+/* ─── Gallery sections ───────────────────────────── */
+
+.gallery-section {
+  padding-top: 48px;
+  padding-bottom: 64px;
+}
+
+.gallery-section.hidden {
+  display: none;
+}
+
+/* ─── Gallery canvas ─────────────────────────────── */
+
+.gallery-canvas {
+  position: relative;
+  width: 100%;
+  height: 760px;
+}
+
+/* ─── Window cards ───────────────────────────────── */
+
+.win {
+  position: absolute;
+  border: 1px solid var(--ink);
+  background: var(--bg);
+  user-select: none;
+  transition: box-shadow 0.12s ease;
+}
+
+.win.dragging,
+.win:hover {
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* Title bar — drag handle */
+.win-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 8px 5px 10px;
+  border-bottom: 1px solid var(--ink);
+  cursor: grab;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.win-bar:active { cursor: grabbing; }
+
+/* 3×3 grip dots */
+.win-bar-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 3px);
+  gap: 2px;
+  opacity: 0.35;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+.win-bar-dots span {
+  width: 3px;
+  height: 3px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+
+.win-body {
+  line-height: 0;
+}
+
+.win-body img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+
+.win-caption {
+  line-height: 1.65;
+  padding: 12px 14px 15px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  color: #555;
+}
+
+/* Placeholder shown before real images are added */
+.win-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background-color: #f4f4f4;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent      0,
+    transparent      10px,
+    #e8e8e8          10px,
+    #e8e8e8          11px
+  );
+}
+
+/* ─── Hover bubble ───────────────────────────────── */
+
+.win-bubble {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+
+  width: 220px;
+  white-space: normal;
+
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+
+  padding: 10px 13px;
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+/* Pixel-art tail pointing upward */
+.win-bubble::before {
+  content: '';
+  position: absolute;
+  background: var(--ink);
+  top: -8px;
+  left: 18px;
+  width: 2px;
+  height: 8px;
+}
+.win-bubble::after {
+  content: '';
+  position: absolute;
+  background: var(--ink);
+  top: -8px;
+  left: 14px;
+  width: 6px;
+  height: 2px;
+}
+
+.win-bubble.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Travel subgroups ───────────────────────────── */
+
+.subgroup {
+  margin-top: 52px;
+}
+
+.subgroup:first-child {
+  margin-top: 0;
+}
+
+.subgroup-title {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #aaa;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 0;
+  font-weight: 400;
+}
+
+/* ─── Info cards ─────────────────────────────────── */
+
+.win-info {
+  padding: 15px 14px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: var(--ink);
+  min-height: 130px;
+}
+
+.win-info a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Map ────────────────────────────────────────── */
+
+.map-layout {
+  display: flex;
+  height: 640px;
+  border: 1px solid var(--ink);
+}
+
+#map-leaflet,
+#brno-map-leaflet {
+  flex: 1;
+  min-width: 0;
+}
+
+.leaflet-div-icon {
+  background: none !important;
+  border: none !important;
+}
+
+.map-pin {
+  cursor: pointer;
+  display: block;
+  line-height: 0;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  transform-origin: center bottom;
+}
+
+.map-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Roboto Mono', monospace;
+  position: relative;
+}
+
+.map-sidebar-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #bbb;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 20px;
+}
+
+.map-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.map-sidebar-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--ink);
+}
+
+.map-sidebar-no-img {
+  width: 100%;
+  height: 120px;
+  border-bottom: 1px solid var(--ink);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-sidebar-body {
+  padding: 16px 16px 24px;
+  overflow-y: auto;
+}
+
+.map-sidebar-back {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  padding: 4px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 18px;
+  line-height: 1;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  z-index: 10;
+}
+
+.map-sidebar-back:hover {
+  color: var(--ink);
+}
+
+.map-sidebar-cat {
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.map-sidebar-name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.map-sidebar-desc {
+  font-size: 11px;
+  line-height: 1.75;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.map-sidebar-address {
+  font-size: 10px;
+  color: #aaa;
+  margin-bottom: 16px;
+}
+
+.map-sidebar-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-sidebar-gmaps {
+  display: block;
+  font-size: 11px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Map legend ─────────────────────────────────────── */
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-bottom: 14px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.map-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─── Map overview list ──────────────────────────────── */
+
+.map-ov-list {
+  padding: 8px 0;
+}
+
+.map-ov-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.map-ov-item:hover {
+  background: #f5f5f5;
+}
+
+.map-ov-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.map-ov-name {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Roboto Mono', monospace;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.map-ov-addr {
+  font-size: 9.5px;
+  color: #aaa;
+  font-family: 'Roboto Mono', monospace;
+  margin-top: 2px;
+}
+
+.map-note {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  color: #bbb;
+  margin-top: 10px;
+  letter-spacing: 0.03em;
+}
+
+.map-note a {
+  color: #bbb;
+  text-underline-offset: 3px;
+}
+
+/* ─── Songs about Prague places ─────────────────────── */
+
+.songs-section {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid #eee;
+}
+
+.songs-heading {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.songs-intro {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.songs-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  background: var(--bg);
+}
+
+.song-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+  transition: background 0.12s;
+}
+
+.songs-list .song-row:last-child {
+  border-bottom: none;
+}
+
+.song-row:hover {
+  background: #f5f5f5;
+}
+
+.song-row:hover .song-play-icon {
+  background: #1DB954;
+  color: #fff;
+}
+
+.song-play-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--ink);
+  transition: background 0.12s, color 0.12s;
+}
+
+.song-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.song-place {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.song-meta {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10.5px;
+  color: #999;
+}
+
+.song-artist {
+  color: #666;
+}
+
+/* ─── Prague Food & Drink filter bar ───────────────── */
+
+.food-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.food-filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border: 1px solid var(--ink);
+  background: var(--bg);
+  cursor: pointer;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--ink);
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+}
+
+.food-filter-chip:hover {
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.food-filter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.food-filter-chip.active {
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.food-filter-chip.active .food-filter-dot {
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* ─── Prague Food & Drink banner ────────────────── */
+
+.food-banner {
+  border: 1px solid var(--ink);
+  padding: 18px 24px;
+  margin-bottom: 32px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: var(--ink);
+  text-align: center;
+  background: var(--bg);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.food-banner a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Suggest a place form ───────────────────────── */
+
+.suggest-content {
+  padding: 56px 0 80px;
+  max-width: 520px;
+}
+
+.suggest-intro {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--ink);
+  margin-bottom: 40px;
+}
+
+.suggest-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggest-label {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 8px;
+  margin-top: 26px;
+}
+
+.suggest-label:first-of-type {
+  margin-top: 0;
+}
+
+.suggest-label .req {
+  color: #D7141A;
+}
+
+.suggest-label .opt {
+  text-transform: none;
+  letter-spacing: 0;
+  color: #bbb;
+  font-size: 10.5px;
+}
+
+.suggest-input {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--ink);
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.suggest-input:focus {
+  outline: none;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.suggest-textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.suggest-file {
+  border: 1px dashed var(--ink);
+  padding: 10px 12px;
+  font-size: 11.5px;
+}
+
+.suggest-submit {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  padding: 14px 24px;
+  margin-top: 40px;
+  cursor: pointer;
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+.suggest-submit:hover {
+  box-shadow: 4px 4px 0 #D7141A;
+  transform: translate(-2px, -2px);
+}
+
+/* ─── Responsive ─────────────────────────────────── */
+
+@media (max-width: 680px) {
+  .logo-panel span { font-size: 15px; }
+  .logo-yay        { font-size: 54px; }
+
+  .gallery-canvas  { height: 900px; }
+
+  .nav-link {
+    padding: 12px 9px;
+    font-size: 0.62rem;
+    letter-spacing: 1.2px;
+  }
+
+  .container   { padding: 0 20px; }
+  header       { padding-top: 40px; }
+
+  .map-layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  #map-leaflet,
+  #brno-map-leaflet {
+    flex: none;
+    width: 100%;
+    height: 340px;
+  }
+
+  .map-sidebar {
+    width: 100%;
+    height: 320px;
+    border-left: none;
+    border-top: 1px solid var(--ink);
+  }
+
+  /* Travel, CZ Food & Prague Picture View: drop the draggable/rotated
+     window layout in favor of plain stacked boxes that size themselves
+     to the viewport. */
+  #travel .gallery-canvas,
+  #cz-food .gallery-canvas,
+  #prague-food .gallery-canvas {
+    position: static;
+    height: auto !important;
+    margin-top: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 8px;
+  }
+
+  #travel .win,
+  #cz-food .win,
+  #prague-food .win {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+
+  #travel .win:hover,
+  #cz-food .win:hover,
+  #prague-food .win:hover {
+    box-shadow: none;
+  }
+
+  #travel .win-bar,
+  #cz-food .win-bar,
+  #prague-food .win-bar {
+    cursor: default;
+  }
+
+  #travel .subgroup {
+    margin-top: 36px;
+  }
+}

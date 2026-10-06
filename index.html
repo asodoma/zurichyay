@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zurich Yay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital@1&family=Inter:wght@300;400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+
+      <!-- ── Logo ──────────────────────────────────────── -->
+      <a href="#home" class="logo-link">
+        <div class="logo">
+          <div class="logo-mark">
+            <div class="logo-panel">
+              <span>ZÜ</span>
+              <span>ZU</span>
+              <span>ZUE</span>
+              <span>ZU</span>
+            </div>
+            <div class="logo-panel">
+              <span>RICH</span>
+              <span>RICH</span>
+              <span>RICH</span>
+              <span>RIGO</span>
+            </div>
+          </div>
+          <span class="logo-yay">yay</span>
+        </div>
+      </a>
+
+      <!-- ── Navigation ────────────────────────────────── -->
+      <nav>
+        <a href="#travel" class="nav-link">Travel to and within Zurich</a>
+        <a href="#map"    class="nav-link">Zurich Map</a>
+      </nav>
+
+    </header>
+
+    <main>
+      <section id="home" class="gallery-section hidden">
+        <div class="home-content">
+          <h1 class="home-greeting">Hey stranger!</h1>
+          <div class="home-body">
+            <p>Welcome to the ZurichYay! database. (Placeholder text – the real intro goes here.)</p>
+          </div>
+          <p class="home-credit">This page is a courtesy of Adéla Sodoma.</p>
+        </div>
+      </section>
+
+      <section id="travel" class="gallery-section hidden">
+        <div class="food-banner">Practical info about getting to and around Zurich will go here.</div>
+      </section>
+
+      <section id="map" class="gallery-section hidden"></section>
+    </main>
+  </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  (function () {
+
+    // ── Map: categories & places ────────────────────────────────────────
+
+    var CAT_COLORS = {
+      food:            '#D7141A',
+      drink:           '#1A3D7A',
+      'food / drink':  '#6B3FA0',
+      coffee:          '#8B5E3C',
+      activities:      '#2D7A3A',
+      vibes:           '#111111'
+    };
+
+    // Add places here, e.g.:
+    // { name: 'Name', category: 'food', lat: 47.37, lng: 8.54,
+    //   img: 'assets/name.jpg', desc: '...', address: '...', url: '...', urlLabel: '...' }
+    var PLACES = [];
+
+    // ── Map builder ─────────────────────────────────────────────────────
+
+    var mapInstance   = null;
+    var activePinEl   = null;
+    var mapMarkers    = [];
+    var mapActiveCats = {};
+
+    function buildMapSection() {
+      var section = document.getElementById('map');
+
+      var layout = document.createElement('div');
+      layout.className = 'map-layout';
+
+      var mapDiv = document.createElement('div');
+      mapDiv.id  = 'map-leaflet';
+      layout.appendChild(mapDiv);
+
+      var sidebar = document.createElement('div');
+      sidebar.className = 'map-sidebar';
+
+      var contentEl = document.createElement('div');
+      contentEl.className = 'map-sidebar-content';
+      contentEl.id = 'map-sidebar-content';
+      sidebar.appendChild(contentEl);
+
+      var closeBtn = document.createElement('button');
+      closeBtn.id = 'map-sidebar-close';
+      closeBtn.className = 'map-sidebar-back';
+      closeBtn.textContent = '×';
+      closeBtn.style.display = 'none';
+      closeBtn.addEventListener('click', showSidebarOverview);
+      sidebar.appendChild(closeBtn);
+
+      layout.appendChild(sidebar);
+
+      var CAT_ORDER = ['food', 'drink', 'food / drink', 'coffee', 'activities', 'vibes'];
+      var seenCats = {};
+      PLACES.forEach(function (p) { seenCats[p.category] = true; });
+      var cats = CAT_ORDER.filter(function (c) { return seenCats[c]; });
+      cats.forEach(function (c) { mapActiveCats[c] = true; });
+
+      var filterBar = document.createElement('div');
+      filterBar.className = 'food-filter-bar';
+
+      function catChips() {
+        return Array.from(filterBar.querySelectorAll('.food-filter-chip[data-cat]:not([data-cat=""])'));
+      }
+
+      function makeMapChip(label, cat) {
+        var chip = document.createElement('div');
+        chip.className = 'food-filter-chip active';
+        chip.dataset.cat = cat;
+        var dot = document.createElement('span');
+        dot.className = 'food-filter-dot';
+        dot.style.background = cat ? (CAT_COLORS[cat] || '#111') : '#111';
+        chip.appendChild(dot);
+        chip.appendChild(document.createTextNode(label));
+        chip.addEventListener('click', function () {
+          if (cat === '') {
+            var allActive = catChips().every(function (c) { return c.classList.contains('active'); });
+            filterBar.querySelectorAll('.food-filter-chip').forEach(function (c) { c.classList.toggle('active', !allActive); });
+          } else {
+            chip.classList.toggle('active');
+            var allChip = filterBar.querySelector('.food-filter-chip[data-cat=""]');
+            var allSelected = catChips().every(function (c) { return c.classList.contains('active'); });
+            allChip.classList.toggle('active', allSelected);
+          }
+          cats.forEach(function (c) {
+            mapActiveCats[c] = filterBar.querySelector('.food-filter-chip[data-cat="' + c + '"]').classList.contains('active');
+          });
+          applyMapFilter();
+        });
+        filterBar.appendChild(chip);
+      }
+
+      if (cats.length) {
+        makeMapChip('All', '');
+        cats.forEach(function (cat) { makeMapChip(cat, cat); });
+        section.appendChild(filterBar);
+      }
+      section.appendChild(layout);
+
+      var note = document.createElement('p');
+      note.className = 'map-note';
+      note.innerHTML = 'shoutout <a href="https://en.wikipedia.org/wiki/OpenStreetMap" target="_blank">OpenStreetMaps</a> – a free, crowdsourced digital map of the world';
+      section.appendChild(note);
+    }
+
+    function applyMapFilter() {
+      PLACES.forEach(function (place, i) {
+        var marker = mapMarkers[i];
+        if (!marker) return;
+        var el = marker.getElement();
+        if (!el) return;
+        el.style.display = mapActiveCats[place.category] === false ? 'none' : '';
+      });
+      var closeBtn = document.getElementById('map-sidebar-close');
+      if (closeBtn && closeBtn.style.display === 'none') {
+        showSidebarOverview();
+      }
+    }
+
+    function highlightPin(marker) {
+      var el = marker.getElement().querySelector('.map-pin');
+      if (activePinEl && activePinEl !== el) { activePinEl.style.transform = ''; activePinEl.style.filter = ''; }
+      el.style.transform = 'scale(1.25) translateY(-4px)';
+      el.style.filter    = 'drop-shadow(0 7px 14px rgba(0,0,0,0.4))';
+      activePinEl = el;
+    }
+
+    function initMap() {
+      if (mapInstance) return;
+
+      mapInstance = L.map('map-leaflet', {
+        center: [47.3769, 8.5417],
+        zoom: 13,
+        minZoom: 10,
+        maxBounds: [[47.15, 8.25], [47.6, 8.85]],
+        maxBoundsViscosity: 0.85,
+        zoomControl: true
+      });
+
+      L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png?api_key=6af81c28-6703-432e-85dd-fc742f112904', {
+        attribution: 'Map tiles by <a href="https://stamen.com">Stamen Design</a>, hosted by <a href="https://stadiamaps.com/">Stadia Maps</a>. Data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.',
+        maxZoom: 20
+      }).addTo(mapInstance);
+
+      PLACES.forEach(function (place) {
+        var color = CAT_COLORS[place.category] || '#111';
+
+        var svg = '<svg viewBox="0 0 40 56" width="40" height="56" style="display:block;overflow:visible">' +
+          '<path d="M20,4 C11.2,4 4,11.2 4,20 C4,31.2 20,52 20,52 C20,52 36,31.2 36,20 C36,11.2 28.8,4 20,4 Z" fill="' + color + '"/>' +
+          '<circle cx="20" cy="20" r="10" fill="white"/>' +
+          '<text x="20" y="24" text-anchor="middle" font-family="Roboto Mono,monospace" font-size="11" font-weight="700" fill="' + color + '">' + place.name.charAt(0) + '</text></svg>';
+
+        var icon = L.divIcon({
+          className: '',
+          html: '<div class="map-pin">' + svg + '</div>',
+          iconSize:   [40, 56],
+          iconAnchor: [20, 56]
+        });
+
+        var marker = L.marker([place.lat, place.lng], { icon: icon }).addTo(mapInstance);
+        mapMarkers.push(marker);
+
+        marker.on('add', function () {
+          var el = marker.getElement().querySelector('.map-pin');
+          el.addEventListener('mouseenter', function () {
+            el.style.transform = 'scale(1.2) translateY(-3px)';
+            el.style.filter    = 'drop-shadow(0 5px 10px rgba(0,0,0,0.3))';
+          });
+          el.addEventListener('mouseleave', function () {
+            if (el !== activePinEl) { el.style.transform = ''; el.style.filter = ''; }
+          });
+        });
+        marker.on('click', function (e) {
+          L.DomEvent.stopPropagation(e);
+          highlightPin(marker);
+          showSidebarPlace(place);
+        });
+      });
+
+      showSidebarOverview();
+      mapInstance.on('click', showSidebarOverview);
+    }
+
+    function showSidebarPlace(place) {
+      var color     = CAT_COLORS[place.category] || '#111';
+      var contentEl = document.getElementById('map-sidebar-content');
+      var gmapsUrl  = 'https://maps.google.com/?q=' + place.lat + ',' + place.lng;
+
+      contentEl.innerHTML =
+        (place.img
+          ? '<img class="map-sidebar-img" src="' + place.img + '" alt="' + place.name + '">'
+          : '<div class="map-sidebar-no-img" style="border-color:' + color + '"><span style="color:' + color + ';font-size:36px;font-family:\'Roboto Mono\',monospace;font-weight:700">' + place.name.charAt(0) + '</span></div>') +
+        '<div class="map-sidebar-body">' +
+        '<div class="map-sidebar-cat" style="color:' + color + '">' + place.category + '</div>' +
+        '<div class="map-sidebar-name">' + place.name + '</div>' +
+        (place.desc ? '<div class="map-sidebar-desc">' + place.desc + '</div>' : '') +
+        '<div class="map-sidebar-address">' + (place.address || '') + '</div>' +
+        '<div class="map-sidebar-links">' +
+        (place.url ? '<a class="map-sidebar-gmaps" href="' + place.url + '" target="_blank">↗ ' + (place.urlLabel || 'website') + '</a>' : '') +
+        '<a class="map-sidebar-gmaps" href="' + gmapsUrl + '" target="_blank">↗ open in Google Maps</a>' +
+        '</div>' +
+        '</div>';
+      document.getElementById('map-sidebar-close').style.display = 'block';
+    }
+
+    function showSidebarOverview() {
+      if (activePinEl) { activePinEl.style.transform = ''; activePinEl.style.filter = ''; activePinEl = null; }
+      var closeBtn = document.getElementById('map-sidebar-close');
+      if (closeBtn) closeBtn.style.display = 'none';
+      var contentEl = document.getElementById('map-sidebar-content');
+      if (!PLACES.length) {
+        contentEl.innerHTML = '<div class="map-sidebar-empty">places coming soon</div>';
+        return;
+      }
+      var html = '<div class="map-ov-list">';
+      PLACES.forEach(function (place, i) {
+        if (mapActiveCats[place.category] === false) return;
+        var color = CAT_COLORS[place.category] || '#111';
+        html += '<div class="map-ov-item" data-i="' + i + '">' +
+          '<span class="map-ov-dot" style="background:' + color + '"></span>' +
+          '<div><div class="map-ov-name">' + place.name + '</div>' +
+          '<div class="map-ov-addr">' + (place.address || '') + '</div></div>' +
+          '</div>';
+      });
+      html += '</div>';
+      contentEl.innerHTML = html;
+      contentEl.querySelectorAll('.map-ov-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          var idx = parseInt(item.dataset.i);
+          highlightPin(mapMarkers[idx]);
+          showSidebarPlace(PLACES[idx]);
+        });
+      });
+    }
+
+    // ── Navigation ──────────────────────────────────────────────────────
+    function navigate() {
+      var hash = window.location.hash || '#home';
+      document.querySelectorAll('.gallery-section').forEach(function (s) { s.classList.add('hidden'); });
+      document.querySelectorAll('.nav-link').forEach(function (l) { l.classList.remove('active'); });
+      var section = document.querySelector(hash);
+      var link    = document.querySelector('a[href="' + hash + '"]');
+      if (section) {
+        section.classList.remove('hidden');
+        if (hash === '#map') {
+          setTimeout(function () {
+            initMap();
+            if (mapInstance) mapInstance.invalidateSize();
+          }, 50);
+        }
+      }
+      if (link) link.classList.add('active');
+    }
+
+    // ── Init ────────────────────────────────────────────────────────────
+    buildMapSection();
+    navigate();
+    window.addEventListener('hashchange', navigate);
+    window.addEventListener('resize', function () {
+      if (mapInstance) mapInstance.invalidateSize();
+    });
+
+  })();
+  </script>
+</body>
+</html>
