@@ -66,6 +66,13 @@ header {
   color: var(--ink);
 }
 
+.logo-img {
+  display: block;
+  height: 84px;
+  width: auto;
+  background: #1106A0;
+}
+
 /* ─── Logo link ──────────────────────────────────── */
 
 .logo-link {
@@ -732,7 +739,7 @@ nav {
 /* ─── Responsive ─────────────────────────────────── */
 
 @media (max-width: 680px) {
-  .logo-panel span { font-size: 15px; }
+  .logo-img        { height: 60px; }
   .logo-yay        { font-size: 54px; }
 
   .gallery-canvas  { height: 900px; }
