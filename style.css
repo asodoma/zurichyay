@@ -355,6 +355,55 @@ nav {
   text-underline-offset: 3px;
 }
 
+/* ─── Price tables ───────────────────────────────── */
+
+.price-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+  border: 1px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.price-table th {
+  text-align: left;
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #aaa;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.price-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.price-table tr:last-child td { border-bottom: none; }
+
+.price-table td:first-child { font-weight: 700; }
+.price-table td:not(:first-child) { white-space: nowrap; }
+
+.subgroup > .win-info {
+  min-height: 0;
+  padding: 18px 0 0;
+}
+
+.price-note {
+  display: block;
+  font-weight: 400;
+  font-size: 10px;
+  color: #999;
+}
+
+.price-best { background: #f5f5f5; }
+
 /* ─── Map ────────────────────────────────────────── */
 
 .map-layout {
