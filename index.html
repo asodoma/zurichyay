@@ -254,18 +254,32 @@
         chip.appendChild(dot);
         chip.appendChild(document.createTextNode(label));
         chip.addEventListener('click', function () {
+          var all  = filterBar.querySelectorAll('.food-filter-chip');
+          var cs   = catChips();
+          var allOn = cs.every(function (c) { return c.classList.contains('active'); });
+
           if (cat === '') {
-            var allActive = catChips().every(function (c) { return c.classList.contains('active'); });
-            filterBar.querySelectorAll('.food-filter-chip').forEach(function (c) { c.classList.toggle('active', !allActive); });
+            // "All" always resets to showing everything
+            all.forEach(function (c) { c.classList.add('active'); });
+          } else if (allOn) {
+            // everything is showing: clicking a category shows only that one
+            all.forEach(function (c) { c.classList.remove('active'); });
+            chip.classList.add('active');
           } else {
             chip.classList.toggle('active');
-            var allChip = filterBar.querySelector('.food-filter-chip[data-cat=""]');
-            var allSelected = catChips().every(function (c) { return c.classList.contains('active'); });
-            allChip.classList.toggle('active', allSelected);
+            // nothing left selected: go back to showing everything
+            if (!cs.some(function (c) { return c.classList.contains('active'); })) {
+              all.forEach(function (c) { c.classList.add('active'); });
+            }
           }
+
+          var nowAll = cs.every(function (c) { return c.classList.contains('active'); });
+          filterBar.querySelector('.food-filter-chip[data-cat=""]').classList.toggle('active', nowAll);
           cats.forEach(function (c) {
             mapActiveCats[c] = filterBar.querySelector('.food-filter-chip[data-cat="' + c + '"]').classList.contains('active');
           });
+          // personal pins (e.g. home) only show when no filter is applied
+          mapActiveCats['personal'] = nowAll;
           applyMapFilter();
         });
         filterBar.appendChild(chip);
